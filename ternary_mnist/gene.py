@@ -113,7 +113,6 @@ class DefaultNodeGene(BaseGene):
         '''
         # self.bias = gauss(0, 1)
         self.bias = np.random.choice(weights)
-        # self.bias = 0
         # self.bias = np.random.choice(weights)
 
 

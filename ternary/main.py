@@ -23,6 +23,7 @@ num_outputs = 1
 pop_size = 200
 fitness_theashold = 3.9
 
+
 if __name__ == '__main__':
     population = DefaultGenomes.create_new(DefaultGenomes, pop_size)
     species_set = DefaultSpeciesSet()

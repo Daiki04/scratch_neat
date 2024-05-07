@@ -1,13 +1,14 @@
 import math
+import tensorflow as tf
 
 xor_inputs = [(0, 0), (0, 1), (1, 0), (1, 1)]
-xor_outputs = [(0,), (1,), (1,), (1,)]
+xor_outputs = [(0,), (1,), (1,), (0,)]
 
-fitness_threshold = 3.9
+fitness_threshold = 0.9
 best_genome = None
 
 num_outputs = 1
-num_inputs = 2
+num_inputs = 784
 
 
 class FeedForwardNetwork:
@@ -30,13 +31,25 @@ class FeedForwardNetwork:
                                 for key in input_nodes + output_nodes)  # ノードの値
 
     @staticmethod
-    def eval_genomes(genomes):
+    def eval_genomes(genomes, x, target, loss, acc, use_x_num=30):
+        use_x_num = min(use_x_num, len(x))
+        x = x[:use_x_num]
+        target = target[:use_x_num]
+        target = tf.convert_to_tensor(target)
         for _, genome in genomes.items():
-            genome.fitness = 4.0
+            outputs = []
+            pred_target = []
             net = FeedForwardNetwork.create(genome)
-            for xi, xo in zip(xor_inputs, xor_outputs):
+            for xi in x:
                 output_values = net.activate(xi)
-                genome.fitness -= (output_values[0] - xo[0]) ** 2
+                outputs.append(output_values)
+                pred_target.append(1 if output_values[0] > 0.5 else 0)
+            outputs = tf.convert_to_tensor(outputs)
+            pred_target = tf.convert_to_tensor(pred_target)
+            outputs = tf.cast(outputs, tf.float32)
+            pred_target = tf.cast(pred_target, tf.float32)
+            genome.fitness = -float(loss(target, outputs).numpy().mean())
+            genome.acc = float(acc(target, outputs).numpy())
 
     @staticmethod
     def create(genome):
