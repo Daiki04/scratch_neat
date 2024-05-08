@@ -4,11 +4,9 @@
 from itertools import count
 
 from gene import DefaultNodeGene, DefaultConnectionGene
-from read_config import read_default_config
 
-config = read_default_config()
-num_inputs = int(config.get('num_inputs'))
-num_outputs = int(config.get('num_outputs'))
+num_inputs = 784
+num_outputs = 1
 
 class DefaultGenomes:
     '''

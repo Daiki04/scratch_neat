@@ -2,14 +2,11 @@ from itertools import count
 import numpy as np
 
 from genome import DefaultGenomes
-from read_config import read_default_config
 
-config = read_default_config()
-
-compatibility_threshold = float(config.get('compatibility_threshold'))  # 類似度の閾値
-initial_connection = config.get('initial_connection')  # 初期接続の種類
-c1 = c2 = float(config.get('c1'))  # 類似度の計算係数
-c3 = float(config.get('c3'))  # 類似度の計算係数
+compatibility_threshold = 3.0  # 類似度の閾値
+initial_connection = "full"  # 初期接続の種類
+c1 = c2 = 3.0  # 類似度の計算係数
+c3 = 0.4  # 類似度の計算係数
 
 
 class Species:

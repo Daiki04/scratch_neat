@@ -12,27 +12,20 @@ from gene import DefaultNodeGene, DefaultConnectionGene
 from spices import Species, DefaultSpeciesSet
 from network import FeedForwardNetwork
 from mutate_crossover import DefaultReproduction
-from read_config import read_default_config
 
-config = read_default_config()
 
-species_fitness_func_dict = {
-    'max': max,
-    'min': min,
-}
+elitism = 20 # それぞれの種である世代から次の世代にコピーされるエリート個体の数
+spice_elitism = 3 # 停滞から保護される種の数を示します。例えば3と設定すると、種の適応度の最も高い3つの種が、たとえ改善が示されなかったとしても、停滞により削除されなくなります。
+survival_threshold = 0.2 # それぞれの種で交叉に使われるエリート個体の割合
+min_species_size = 10 # それぞれの種の最小個体数
+species_fitness_func = max # 種の適応度を計算する関数:max, min, meanなど
+max_stagnation = 60 # 種が停滞すると見なされる世代数
 
-elitism = int(config.get('elitism'))
-spice_elitism = int(config.get('spice_elitism'))
-survival_threshold = float(config.get('survival_threshold'))
-min_species_size = int(config.get('min_species_size'))
-species_fitness_func = species_fitness_func_dict[config.get('species_fitness_func')]
-max_stagnation = int(config.get('max_stagnation'))
+num_inputs = 1
+num_outputs = 784
 
-num_inputs = int(config.get('num_inputs'))
-num_outputs = int(config.get('num_outputs'))
-
-pop_size = int(config.get('pop_size'))
-fitness_theashold = float(config.get('fitness_threshold'))
+pop_size = 200
+fitness_theashold = 0.95
 
 def _create_dataset():
     mnist = tf.keras.datasets.mnist

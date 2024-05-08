@@ -1,17 +1,13 @@
 import math
 import tensorflow as tf
 
-from read_config import read_default_config
-
-config = read_default_config()
-
 xor_inputs = [(0, 0), (0, 1), (1, 0), (1, 1)]
 xor_outputs = [(0,), (1,), (1,), (0,)]
 
-fitness_theashold = float(config.get('fitness_threshold'))
+fitness_threshold = 0.9
 
-num_inputs = int(config.get('num_inputs'))
-num_outputs = int(config.get('num_outputs'))
+num_outputs = 1
+num_inputs = 784
 
 
 class FeedForwardNetwork:
