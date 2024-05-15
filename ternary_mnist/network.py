@@ -1,5 +1,6 @@
 import math
 import tensorflow as tf
+import numpy as np
 
 from read_config import read_default_config
 
@@ -46,13 +47,17 @@ class FeedForwardNetwork:
             for xi in x:
                 output_values = net.activate(xi)
                 outputs.append(output_values)
-                pred_target.append(1 if output_values[0] > 0.5 else 0)
+                pred_label = [0] * num_outputs
+                pred_label[np.argmax(output_values)] = 1
+                pred_target.append(pred_label)
             outputs = tf.convert_to_tensor(outputs)
             pred_target = tf.convert_to_tensor(pred_target)
             outputs = tf.cast(outputs, tf.float32)
             pred_target = tf.cast(pred_target, tf.float32)
-            genome.fitness = float(acc(target, outputs).numpy())
-            genome.acc = float(acc(target, outputs).numpy())
+            genome.fitness = -float(loss(target, outputs).numpy().mean())
+            acc.reset_state()
+            acc.update_state(target, outputs)
+            genome.acc = float(acc.result().numpy())
 
     @staticmethod
     def test_genome(genome, x, target, loss, acc):
@@ -63,13 +68,17 @@ class FeedForwardNetwork:
         for xi in x:
             output_values = net.activate(xi)
             outputs.append(output_values)
-            pred_target.append(1 if output_values[0] > 0.5 else 0)
+            pred_label = [0] * num_outputs
+            pred_label[np.argmax(output_values)] = 1
+            pred_target.append(pred_label)
         outputs = tf.convert_to_tensor(outputs)
         pred_target = tf.convert_to_tensor(pred_target)
         outputs = tf.cast(outputs, tf.float32)
         pred_target = tf.cast(pred_target, tf.float32)
         fitness = -float(loss(target, outputs).numpy().mean())
-        acc = float(acc(target, outputs).numpy())
+        acc.reset_state()
+        acc.update_state(target, outputs)
+        acc = float(acc.result().numpy())
         return fitness, acc
 
     @staticmethod
@@ -110,15 +119,25 @@ class FeedForwardNetwork:
         # ノードの値を計算
         # aggregate function: sum
         # activation function: sigmoid
+        # logitを返す
         for node, _, _, bias, response, links in self.node_evals:
             node_input_values = []
             for i, w in links:
                 node_input_values.append(self.node_values[i] * w)
             y = sum(node_input_values)
             y = bias + response * y
-            self.node_values[node] = 1.0 / (1.0 + math.exp(-y))
+            if w in self.output_nodes:
+                self.node_values[node] = y
+            else:
+                self.node_values[node] = 1.0 / (1.0 + math.exp(-y))
 
-        return [self.node_values[i] for i in self.output_nodes]
+        # 出力ノードをソフトマックス関数で計算
+        output_values = [self.node_values[i] for i in self.output_nodes]
+        exp_output_values = [math.exp(i) for i in output_values]
+        sum_exp_output_values = sum(exp_output_values)
+        softmax_output_values = [i / sum_exp_output_values for i in exp_output_values]
+
+        return softmax_output_values
 
     @staticmethod
     def required_for_output(input_nodes, output_nodes, connections):

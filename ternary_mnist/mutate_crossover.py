@@ -220,23 +220,24 @@ class Mutate:
 
         :param genome: ゲノム
         """
-        if random.random() < 0.2:
-            self.mutate_delete_node(genome)
-        
-        if random.random() < 0.2:
-            self.mutate_add_node(genome)
-
-        if random.random() < 0.5:
-            self.mutate_delete_connection(genome)
-        
-        if random.random() < 0.5:
-            self.mutate_add_connection(genome)
+        if random.random() < 0.05:
+            r = random.random()
+            if r < 0.25:
+                self.mutate_delete_node(genome)
+            elif random.random() < 0.5:
+                self.mutate_add_node(genome)
+            elif random.random() < 0.75:
+                self.mutate_delete_connection(genome)
+            else:
+                self.mutate_add_connection(genome)
 
         for connection_gene in genome.connections.values():
-            connection_gene.mutate()
+            if random.random() < 0.05:
+                connection_gene.mutate()
 
         for node_gene in genome.nodes.values():
-            node_gene.mutate()
+            if random.random() < 0.05:
+                node_gene.mutate()
     
     def mutate_delete_node(self, genome):
         """

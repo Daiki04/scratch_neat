@@ -109,7 +109,7 @@ if __name__ == '__main__':
                 best_test_fitness_hist.append(best_test_fitness_hist[-1])
                 best_test_acc_hist.append(best_test_acc_hist[-1])
 
-        print(f'Generation: {generation}, Best Genome: {best_genome_id}, Fitness: {best_genome.fitness}, Acc: {best_genome.acc}, Test Loss: {test_loss}, Test Acc: {test_acc}')
+        print(f'Generation: {generation}, Number of Species: {len(species_set.species)}, Best Genome: {best_genome_id}, Fitness: {best_genome.fitness}, Acc: {best_genome.acc}, Test Loss: {test_loss}, Test Acc: {test_acc}')
 
         if best_genome.acc >= fitness_theashold:
             print('Threshold reached')

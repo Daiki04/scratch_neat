@@ -54,9 +54,9 @@ class BaseGene:
                 setattr(self, a, v)
             else:
                 r = random()
-                if r < 0.9:
+                if r < 0.2:
                     # v += gauss(0, 1.0)
-                    v = np.random.choice(weights)
+                    v *= -1
                 else:
                     # v = gauss(0, 1)
                     v = np.random.choice(weights)
@@ -83,7 +83,7 @@ class BaseGene:
         '''
         new_gene = self.__class__(self.key)
         for a in self._gene_attributes:
-            if random() < 0.8:
+            if random() < 0.5:
                 setattr(new_gene, a, getattr(self, a))
             else:
                 setattr(new_gene, a, getattr(other, a))
@@ -109,8 +109,9 @@ class DefaultNodeGene(BaseGene):
         '''
         属性の初期化
         '''
+        self.bias = 0
         # self.bias = gauss(0, 1)
-        self.bias = np.random.choice(weights)
+        # self.bias = np.random.choice(weights)
         # self.bias = np.random.choice(weights)
 
 
