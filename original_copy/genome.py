@@ -2,6 +2,7 @@
 ゲノムクラス
 '''
 from itertools import count
+import pickle
 
 from gene import DefaultNodeGene, DefaultConnectionGene
 from read_config import read_default_config
@@ -108,6 +109,25 @@ class DefaultGenomes:
         for cg in connections:
             s += f'\n\t{cg}'
         return s
+    
+    def save(self, filename):
+        '''
+        コネクション遺伝子とノード遺伝子をファイルに保存
+        '''
+
+        with open(filename, 'wb') as f:
+            pickle.dump(self.connections, f)
+            pickle.dump(self.nodes, f)
+
+    def load(self, filename):
+        '''
+        コネクション遺伝子とノード遺伝子をファイルから読み込み
+        '''
+
+        with open(filename, 'rb') as f:
+            self.connections = pickle.load(f)
+            self.nodes = pickle.load(f)
+
     
 if __name__ == '__main__':
     pop_size = 10

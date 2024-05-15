@@ -51,8 +51,8 @@ class FeedForwardNetwork:
             pred_target = tf.convert_to_tensor(pred_target)
             outputs = tf.cast(outputs, tf.float32)
             pred_target = tf.cast(pred_target, tf.float32)
-            genome.fitness = float(acc(target, outputs).numpy())
-            genome.acc = float(acc(target, outputs).numpy())
+            genome.fitness = -float(loss(target, outputs).numpy().mean())
+            genome.acc = float(acc(target, pred_target).numpy())
 
     @staticmethod
     def test_genome(genome, x, target, loss, acc):
@@ -69,7 +69,7 @@ class FeedForwardNetwork:
         outputs = tf.cast(outputs, tf.float32)
         pred_target = tf.cast(pred_target, tf.float32)
         fitness = -float(loss(target, outputs).numpy().mean())
-        acc = float(acc(target, outputs).numpy())
+        acc = float(acc(target, pred_target).numpy())
         return fitness, acc
 
     @staticmethod

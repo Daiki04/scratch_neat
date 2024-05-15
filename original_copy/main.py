@@ -45,10 +45,19 @@ def _create_dataset():
     y_train = y_train[train_indices]
     x_test = x_test[test_indices]
     y_test = y_test[test_indices]
-    # データ数が多いので削減
-    x_train = x_train[:1000]
-    y_train = y_train[:1000]
     return (x_train, y_train), (x_test, y_test)
+
+def print_config():
+    print(f'elitism: {elitism}')
+    print(f'spice_elitism: {spice_elitism}')
+    print(f'survival_threshold: {survival_threshold}')
+    print(f'min_species_size: {min_species_size}')
+    print(f'species_fitness_func: {species_fitness_func}')
+    print(f'max_stagnation: {max_stagnation}')
+    print(f'num_inputs: {num_inputs}')
+    print(f'num_outputs: {num_outputs}')
+    print(f'pop_size: {pop_size}')
+    print(f'fitness_theashold: {fitness_theashold}')
 
 if __name__ == '__main__':
     population = DefaultGenomes.create_new(DefaultGenomes, pop_size)
@@ -63,14 +72,20 @@ if __name__ == '__main__':
     best_test_fitness_hist = []
     best_test_acc_hist = []
 
+    print_config()
+
     while True:
+        train_indices = np.random.choice(len(x), 1000, replace=False)
+        train_x = x[train_indices]
+        train_y = y[train_indices]
+
         ### 1.種に分ける
         species_set.speciate(population, generation)
 
         ### 2.適応度の評価
         loss = tf.keras.losses.BinaryCrossentropy(from_logits=False, axis=-1, reduction="none")
         acc = tf.keras.metrics.BinaryAccuracy()
-        FeedForwardNetwork.eval_genomes(population, x, y, loss, acc)
+        FeedForwardNetwork.eval_genomes(population, train_x, train_y, loss, acc)
 
         best_genome_id, best_genome = max(population.items(), key=lambda x: x[1].fitness)
         test_loss, test_acc = FeedForwardNetwork.test_genome(best_genome, x_test, y_test, loss, acc)
@@ -80,6 +95,8 @@ if __name__ == '__main__':
         if generation == 0:
             best_fitness_hist.append(best_genome.fitness)
             best_acc_hist.append(best_genome.acc)
+            best_test_fitness_hist.append(test_loss)
+            best_test_acc_hist.append(test_acc)
         else:
             if best_genome.fitness > best_fitness_hist[-1]:
                 best_fitness_hist.append(best_genome.fitness)
