@@ -21,11 +21,13 @@ elitism = int(config.get('elitism'))
 spice_elitism = int(config.get('spice_elitism'))
 survival_threshold = float(config.get('survival_threshold'))
 min_species_size = int(config.get('min_species_size'))
-species_fitness_func = species_fitness_func_dict[config.get('species_fitness_func')]
+species_fitness_func = species_fitness_func_dict[config.get(
+    'species_fitness_func')]
 max_stagnation = int(config.get('max_stagnation'))
 
 num_inputs = int(config.get('num_inputs'))
 num_outputs = int(config.get('num_outputs'))
+
 
 class DefaultReproduction:
     """
@@ -33,7 +35,7 @@ class DefaultReproduction:
     """
 
     def __init__(self):
-        self.genome_indexer = count(1) # ゲノム番号のインデクサ
+        self.genome_indexer = count(1)  # ゲノム番号のインデクサ
 
     @staticmethod
     def compute_species_size(adjusted_fitness, previous_sizes, pop_size, min_species_size):
@@ -49,11 +51,12 @@ class DefaultReproduction:
         adjusted_fitness_sum = sum(adjusted_fitness)
         next_species_size = []
         for adjusted, previous in zip(adjusted_fitness, previous_sizes):
-            size = max(min_species_size, int(adjusted / adjusted_fitness_sum * pop_size))
+            size = max(min_species_size, int(
+                adjusted / adjusted_fitness_sum * pop_size))
             next_species_size.append(size)
 
         return next_species_size
-    
+
     def configure_crossover(self, genome1, genome2, child):
         """
         交叉の設定
@@ -75,7 +78,8 @@ class DefaultReproduction:
             if connction_gene2 is None:
                 child.connections[key] = connction_gene1.copy()
             else:
-                child.connections[key] = connction_gene1.crossover(connction_gene2)
+                child.connections[key] = connction_gene1.crossover(
+                    connction_gene2)
 
         # 交叉:ノード遺伝子
         parent1_nodes = parent1.nodes
@@ -117,7 +121,7 @@ class DefaultReproduction:
 
             if num_non_stagnant > spice_elitism:
                 is_stagnant = stagment_time >= max_stagnation
-            
+
             if (len(species_data) - idx) <= spice_elitism:
                 is_stagnant = False
 
@@ -127,7 +131,7 @@ class DefaultReproduction:
             result.append((specie_id, specie, is_stagnant))
 
         return result
-    
+
     def reproduce(self, species, pop_size, generation):
         """
         交叉
@@ -146,14 +150,15 @@ class DefaultReproduction:
                 # print(f"Species {stagnation_speice_id} is stagnated")
                 pass
             else:
-                all_fitness.extend(m.fitness for m in stagnation_speice.members.values())
+                all_fitness.extend(
+                    m.fitness for m in stagnation_speice.members.values())
                 remaining_species.append(stagnation_speice)
 
         if not remaining_species:
             print("All species are stagnated.")
             species.species = {}
             return {}
-        
+
         min_fitness = min(all_fitness)
         max_fitness = max(all_fitness)
 
@@ -161,12 +166,14 @@ class DefaultReproduction:
 
         # 調整適応度
         for spice in remaining_species:
-            mean_fitness = sum(m.fitness for m in spice.members.values()) / len(spice.members)
+            mean_fitness = sum(
+                m.fitness for m in spice.members.values()) / len(spice.members)
             adjuested_fitness = (mean_fitness - min_fitness) / fitness_range
             spice.adjusted_fitness = adjuested_fitness
 
         adjuested_fitness = [s.adjusted_fitness for s in remaining_species]
-        species_sizes = self.compute_species_size(adjuested_fitness, [len(s.members) for s in remaining_species], pop_size, min_species_size)
+        species_sizes = self.compute_species_size(adjuested_fitness, [len(
+            s.members) for s in remaining_species], pop_size, min_species_size)
 
         new_genomes = {}
         species.species = {}
@@ -207,10 +214,12 @@ class DefaultReproduction:
 
         return new_genomes
 
+
 class Mutate:
     """
     突然変異クラス
     """
+
     def __init__(self):
         pass
 
@@ -220,25 +229,25 @@ class Mutate:
 
         :param genome: ゲノム
         """
-        if random.random() < 0.05:
+        if random.random() < 0.1:
             r = random.random()
-            if r < 0.25:
+            if r < 0.2:
                 self.mutate_delete_node(genome)
             elif random.random() < 0.5:
                 self.mutate_add_node(genome)
-            elif random.random() < 0.75:
+            elif random.random() < 0.7:
                 self.mutate_delete_connection(genome)
             else:
                 self.mutate_add_connection(genome)
 
         for connection_gene in genome.connections.values():
-            if random.random() < 0.05:
+            if random.random() < 0.1:
                 connection_gene.mutate()
 
         for node_gene in genome.nodes.values():
-            if random.random() < 0.05:
+            if random.random() < 0.1:
                 node_gene.mutate()
-    
+
     def mutate_delete_node(self, genome):
         """
         ノードの削除
@@ -247,11 +256,12 @@ class Mutate:
         :return: 削除されたノード，削除されなかった場合は-1
         """
         output_keys = [i for i in range(num_outputs)]
-        available_nodes = [i for i in genome.nodes.keys() if i not in output_keys]
+        available_nodes = [
+            i for i in genome.nodes.keys() if i not in output_keys]
 
         if not available_nodes:
             return -1
-        
+
         del_key = choice(available_nodes)
 
         connections_to_delete = set()
@@ -275,7 +285,7 @@ class Mutate:
         """
         if not genome.connections:
             return
-        
+
         connection_gene = choice(list(genome.connections.values()))
         if genome.node_indexer is None:
             genome.node_indexer = count(max(list(genome.nodes.keys())) + 1)
@@ -286,7 +296,8 @@ class Mutate:
 
         in_node, out_node = connection_gene.key
         self.add_connection(genome, in_node, new_node_id, 1.0, True)
-        self.add_connection(genome, new_node_id, out_node, connection_gene.weight, True)
+        self.add_connection(genome, new_node_id, out_node,
+                            connection_gene.weight, True)
 
     def add_connection(self, genome, in_node, out_node, weight, enabled):
         """
@@ -330,15 +341,16 @@ class Mutate:
         key = (in_node, out_node)
         if key in genome.connections:
             return
-        
+
         if in_node == out_node:
             return
-        
+
         if (in_node, out_node) in genome.connections or (out_node, in_node) in genome.connections:
             return
-        
+
         connection_gene = DefaultGenomes.create_connection(in_node, out_node)
         genome.connections[connection_gene.key] = connection_gene
+
 
 if __name__ == '__main__':
     genomes = DefaultGenomes.create_new(DefaultGenomes, 10)
