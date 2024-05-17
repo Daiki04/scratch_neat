@@ -80,7 +80,7 @@ class DefaultSpeciesSet:
         E = 0
 
         for connection_id in me_connections_ids & other_connections_ids:
-            bar_W = abs(me.connections[connection_id].weight -
+            bar_W += abs(me.connections[connection_id].weight -
                         other.connections[connection_id].weight)
 
         if len(me_connections_ids & other_connections_ids) > 0:
