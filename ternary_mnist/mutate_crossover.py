@@ -52,7 +52,7 @@ class DefaultReproduction:
         next_species_size = []
         for adjusted, previous in zip(adjusted_fitness, previous_sizes):
             size = max(min_species_size, int(
-                adjusted / adjusted_fitness_sum * pop_size))
+                pop_size * adjusted / adjusted_fitness_sum))
             next_species_size.append(size)
 
         return next_species_size
@@ -66,20 +66,35 @@ class DefaultReproduction:
         :param child: 子
         """
 
+        fitness_even = False
+
         # 適応度が高い方を親1、低い方を親2とする
         if genome1.fitness > genome2.fitness:
             parent1, parent2 = genome1, genome2
         else:
             parent1, parent2 = genome2, genome1
 
+        if parent1.fitness == parent2.fitness:
+            fitness_even = True
+
         # 交叉:コネクション遺伝子
         for key, connction_gene1 in parent1.connections.items():
             connction_gene2 = parent2.connections.get(key)
             if connction_gene2 is None:
-                child.connections[key] = connction_gene1.copy()
+                if fitness_even and random.random() < 0.5:
+                    child.connections[key] = connction_gene1.copy()
+                else:
+                    child.connections[key] = connction_gene1.copy()
             else:
                 child.connections[key] = connction_gene1.crossover(
                     connction_gene2)
+
+        if fitness_even:
+            for key, connction_gene2 in parent2.connections.items():
+                connction_gene1 = parent1.connections.get(key)
+                if connction_gene1 is None:
+                    if random.random() < 0.5:
+                        child.connections[key] = connction_gene2.copy()
 
         # 交叉:ノード遺伝子
         parent1_nodes = parent1.nodes
@@ -88,9 +103,19 @@ class DefaultReproduction:
         for key, node_gene1 in parent1_nodes.items():
             node_gene2 = parent2_nodes.get(key)
             if node_gene2 is None:
-                child.nodes[key] = node_gene1.copy()
+                if fitness_even and random.random() < 0.5:
+                    child.nodes[key] = node_gene1.copy()
+                else:
+                    child.nodes[key] = node_gene1.copy()
             else:
                 child.nodes[key] = node_gene1.crossover(node_gene2)
+
+        if fitness_even:
+            for key, node_gene2 in parent2_nodes.items():
+                node_gene1 = parent1_nodes.get(key)
+                if node_gene1 is None:
+                    if random.random() < 0.5:
+                        child.nodes[key] = node_gene2.copy()
 
     def update(self, species, generation):
         species_data = []
@@ -233,19 +258,19 @@ class Mutate:
             r = random.random()
             if r < 0.2:
                 self.mutate_delete_node(genome)
-            elif random.random() < 0.5:
+            elif random.random() < 0.4:
                 self.mutate_add_node(genome)
-            elif random.random() < 0.7:
+            elif random.random() < 0.6:
                 self.mutate_delete_connection(genome)
             else:
                 self.mutate_add_connection(genome)
 
         for connection_gene in genome.connections.values():
-            if random.random() < 0.1:
+            if random.random() < 0.01:
                 connection_gene.mutate()
 
         for node_gene in genome.nodes.values():
-            if random.random() < 0.1:
+            if random.random() < 0.01:
                 node_gene.mutate()
 
     def mutate_delete_node(self, genome):
