@@ -103,10 +103,7 @@ class DefaultReproduction:
         for key, node_gene1 in parent1_nodes.items():
             node_gene2 = parent2_nodes.get(key)
             if node_gene2 is None:
-                if fitness_even and random.random() < 0.5:
-                    child.nodes[key] = node_gene1.copy()
-                else:
-                    child.nodes[key] = node_gene1.copy()
+                child.nodes[key] = node_gene1.copy()
             else:
                 child.nodes[key] = node_gene1.crossover(node_gene2)
 
@@ -114,8 +111,7 @@ class DefaultReproduction:
             for key, node_gene2 in parent2_nodes.items():
                 node_gene1 = parent1_nodes.get(key)
                 if node_gene1 is None:
-                    if random.random() < 0.5:
-                        child.nodes[key] = node_gene2.copy()
+                    child.nodes[key] = node_gene2.copy()
 
     def update(self, species, generation):
         species_data = []
